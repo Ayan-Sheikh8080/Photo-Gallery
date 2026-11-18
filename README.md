@@ -1,75 +1,61 @@
-# React + TypeScript + Vite
+# Photo Gallery
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A React and AWS Amplify Gen 2 photo gallery with Cognito sign-in, AppSync
+GraphQL, private S3 uploads, a Cognito-protected API Gateway endpoint, and
+CloudWatch monitoring.
 
-Currently, two official plugins are available:
+## Run locally
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+1. Install Node.js 20 and run `npm ci`.
+2. Set the Amplify backend secrets `GOOGLE_CLIENT_ID` and
+   `GOOGLE_CLIENT_SECRET` for your Google OAuth app.
+3. Configure the Google OAuth authorized redirect URI to the Cognito hosted UI
+   `/oauth2/idpresponse` callback shown by your deployed user pool.
+4. Run `npx ampx sandbox` to deploy a personal backend and generate
+   `amplify_outputs.json`.
+5. Run `npm run dev`, then sign in and upload an image.
 
-## React Compiler
+`amplify_outputs.json` is generated per environment and ignored by Git. Update
+the callback and logout URLs in `amplify/auth/resource.ts` when using a
+different production domain.
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## Backend behavior
 
-## Expanding the ESLint configuration
+- Signed-in users can read photos; photo owners and members of `Admins` can
+  create, update, and delete photo records.
+- Images are stored under `photos/{identityId}/` in S3. Owners can manage their
+  own images; signed-in users can read gallery images; `Admins` can read and
+  delete them.
+- `GET /health` is public. `GET /me` requires a Cognito user-pool token and
+  returns the caller's email and group claims.
+- The frontend exposes delete controls to photo owners and members of
+  `Admins`; AppSync and S3 authorization remain the enforcement layer.
+- The deployment creates a CloudWatch dashboard and a Lambda error alarm. The
+  alarm publishes to the SNS topic ARN in `amplify_outputs.json`.
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Console setup and evidence
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+These deployment/account tasks cannot be completed from the source repository:
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+- Deploy the backend and frontend, configure Google OAuth credentials and
+  callback URLs, and sign in using the live Amplify URL.
+- Add your user to the Cognito `Admins` group. Test with a separate user to
+  confirm the post-confirmation trigger adds them to `Users`.
+- Subscribe an email address to the SNS topic ARN in the generated outputs and
+  confirm the subscription. Temporarily cause a REST Lambda error to test the
+  alarm, then remove the test change.
+- Configure GitHub Actions secret `SNYK_TOKEN`. CodeQL analysis for private
+  repositories may require GitHub Advanced Security. Review all four CI jobs
+  after pushing to `main`.
+- Capture the requested deployment, Cognito, REST, GraphQL/gallery, S3, CI,
+  CloudWatch, and live-app screenshots after successful deployment.
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+Never commit OAuth credentials, Snyk tokens, or generated Amplify outputs.
 
-```
+## Checks
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
+```sh
+npm run lint
+npm run format:check
+npm run build
 ```
