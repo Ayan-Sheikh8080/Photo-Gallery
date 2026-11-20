@@ -17,13 +17,15 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
       - run: npm ci
       - name: ESLint
         run: npm run lint
       - name: Prettier check
         run: npm run format:check
+      - name: Production build
+        run: npm run build
 
   secret-scan:
     runs-on: ubuntu-latest
@@ -50,7 +52,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
       - run: npm ci
       - uses: snyk/actions/node@master
