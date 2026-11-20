@@ -85,7 +85,7 @@ const appSyncRequests = new Metric({
 });
 
 const dashboard = new Dashboard(apiStack, 'PhotoGalleryDashboard', {
-  dashboardName: 'photo-gallery-monitoring',
+  dashboardName: 'photo-gallery-monitoring-v2',
 });
 dashboard.addWidgets(
   new GraphWidget({

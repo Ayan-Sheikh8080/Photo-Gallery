@@ -208,7 +208,7 @@ authorization enforce access independently of the frontend controls.
 ## CloudWatch Monitoring
 
 The CDK backend creates a CloudWatch dashboard named
-`photo-gallery-monitoring`.
+`photo-gallery-monitoring-v2`.
 
 Dashboard widgets cover:
 
@@ -442,7 +442,7 @@ repository alone.
 
 - Open the REST handler and post-confirmation Lambda CloudWatch log groups and
   confirm that entries exist.
-- Confirm the `photo-gallery-monitoring` CloudWatch dashboard exists.
+- Confirm the `photo-gallery-monitoring-v2` CloudWatch dashboard exists.
 - Verify Lambda Invocations and Errors widgets.
 - Verify API Gateway Count, 4XXError, and 5XXError widgets.
 - Verify the AppSync request-count widget.
