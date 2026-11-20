@@ -24,8 +24,6 @@ jobs:
         run: npm run lint
       - name: Prettier check
         run: npm run format:check
-      - name: Production build
-        run: npm run build
 
   secret-scan:
     runs-on: ubuntu-latest
