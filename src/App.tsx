@@ -32,7 +32,11 @@ function App() {
   return (
     <Authenticator socialProviders={['google']}>
       {({ signOut, user }) => (
-        <Gallery userId={user.userId} signOut={signOut} />
+        <Gallery
+          userId={user.userId}
+          username={user.username}
+          signOut={signOut}
+        />
       )}
     </Authenticator>
   );
@@ -40,9 +44,11 @@ function App() {
 
 function Gallery({
   userId,
+  username,
   signOut,
 }: {
   userId: string;
+  username: string;
   signOut?: () => void;
 }) {
   const [photos, setPhotos] = useState<Photo[]>([]);
@@ -257,9 +263,14 @@ function Gallery({
         ) : (
           <div className="photo-grid">
             {photos.map((photo) => {
+              const owner = photo.owner ?? '';
+              const ownerIdentifiers = owner.split('::');
+
               const isOwner =
-                photo.owner?.split('::')[0] === userId ||
-                photo.owner === userId;
+                owner === userId ||
+                owner === username ||
+                ownerIdentifiers.includes(userId) ||
+                ownerIdentifiers.includes(username);
               return (
                 <article className="photo-card" key={photo.id}>
                   <StorageImage
